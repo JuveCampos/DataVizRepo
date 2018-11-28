@@ -15,7 +15,6 @@ b <- runif(n = 12, min = 0, max = 12)
 c <- as.data.frame(cbind(a,b))
 class(c$a) #Numeric
 class(c$b) #Numeric
-
 ggplot(data = c, aes(x = a, y = b)) + geom_line() 
 
 
@@ -87,6 +86,7 @@ ggplot(data = c, aes(x = a, y = b, group=1)) +
 
 
 # Gráfica con titulo y etiqueta de ejes de colores + linea de colores + puntos rojos en cada vértice + theme_solarized()
+# + etiquetas ejes en vertical
 (graf1 <- ggplot(data = c, aes(x = a, y = b, group=1)) + theme_solarized() +
     geom_line(colour = "#7fc0f9", size = 2) + 
     ggtitle("Datos Aleatorios en funcion de un grupo \n alfabético") +
@@ -101,7 +101,8 @@ ggplot(data = c, aes(x = a, y = b, group=1)) +
     labs(x = "Clases de la información",y = "Valores") + # Etiquetas o títulos de los ejes
     theme(axis.title.x = element_text(face="bold", vjust=-0.5, colour="orange", size=rel(1.5))) + # Color y forma eje de las x
     theme(axis.title.y = element_text(face="bold", vjust=1.5, colour="blue", size=rel(1.5))) +     # Color y forma eje de las y
-    geom_point(fun.y = sum, stat = "summary", colour = "red", size = 3) )
+    geom_point(fun.y = sum, stat = "summary", colour = "red", size = 3) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) )  
 
 
 ggplotly(graf1)
