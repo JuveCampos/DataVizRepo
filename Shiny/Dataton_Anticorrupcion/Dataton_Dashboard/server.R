@@ -11,5 +11,11 @@ library(shiny)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
- 
-})
+      # Link a google fonts
+      url <- a("Google Fonts", href="https://fonts.google.com")
+      output$tab <- renderUI({
+        tagList("Catálogo de fuentes: ", url)
+      })
+  })
+  
+  
