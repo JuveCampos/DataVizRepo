@@ -3,7 +3,7 @@
 #########################################
 
 # Hacemos la función para incluir al norte 
-norte <- function(mapa_leaflet, ancho = 40, posicion = 'topright'){
+norte <- function(mapa_leaflet, ancho = 40, posicion = 'topleft'){
   # 1. Descargamos la imagen
   
   north.arrow.icon <- paste0("<img src='http://ian.umces.edu/imagelibrary/albums/userpics/10002/normal_ian-symbol-north-arrow-2.png' style='width:",
