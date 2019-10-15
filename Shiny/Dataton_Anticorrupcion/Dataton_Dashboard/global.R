@@ -1,4 +1,0 @@
-# global
-
-library(shinydashboard)
-
