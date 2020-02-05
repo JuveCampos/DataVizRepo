@@ -1,6 +1,14 @@
 # FUNCION GRAFICA DE BARRAS
-graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Tamaulipas", 'Nacional'),
-                          mejorArriba = TRUE, nombre_archivo = "grafica_"){
+graficas_base <- function(titulo = "", datos_x, datos_y,
+                          estados_interes = c("Tamaulipas", 'Nacional'),
+                          etiqueta_nacional = "Nacional",
+                          color_estados_interes = "dodgerblue1",
+                          color_base = "dimgray",
+                          mejorArriba = TRUE,
+                          nombre_archivo = "grafica_",
+                          highlightMinMax = TRUE,
+                          etiqueta_numero = ""
+                          ){
 
 
   pacman::p_load(tidyverse, rebus)
@@ -105,7 +113,12 @@ graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Ta
   minimo         <- sort(minimo)[1]
   maximo         <- datos_x[which(datos_y == max(datos_y, na.rm = FALSE))]
   maximo         <- maximo[1]
-  estados_interes <- c(estados_interes, minimo, maximo)
+
+  if(highlightMinMax){
+    estados_interes <- c(estados_interes, minimo, maximo)
+  } else {
+    estados_interes <- c(estados_interes)
+  }
 
   # Etiquetas
   etiquetas <- c(rep("", length(datos_x)))
@@ -115,18 +128,18 @@ graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Ta
   # as.numeric(etiquetas)
   etiquetas_pos  <- case_when(is.na(as.numeric(etiquetas)) ~ "",
                               as.numeric(etiquetas) < 0 ~ "",
-                              as.numeric(etiquetas) > 0 ~ formato(as.numeric(etiquetas), 3)
-  )
+                              as.numeric(etiquetas) > 0  ~ paste0(formato(as.numeric(etiquetas), 3), etiqueta_numero),
+                              as.numeric(etiquetas) == 0 ~ paste0(formato(as.numeric(etiquetas), 3), etiqueta_numero))
 
   etiquetas_neg  <- case_when(is.na(as.numeric(etiquetas)) ~ "",
                               as.numeric(etiquetas) > 0 ~ "",
-                              as.numeric(etiquetas) < 0 ~ formato(as.numeric(etiquetas), 3)
-  )
+                              as.numeric(etiquetas) < 0 ~ paste0(formato(as.numeric(etiquetas), 3), etiqueta_numero))
 
   # Colores
   colores <- c(rep("base", length(datos_x)))
-  colores[str_detect(datos_x, pattern = estados_interes[1])] <- "Estado_interes"
-  colores[str_detect(datos_x, pattern = estados_interes[2])] <- "Nacional"
+  #colores[str_detect(datos_x, pattern = estados_interes[1])]   <- "Estado_interes"
+  colores[str_detect(datos_x, pattern = or1(estados_interes))] <- "Estado_interes"
+  colores[str_detect(datos_x, pattern = etiqueta_nacional)]    <- "Nacional"
   #colores[str_detect(datos_x, pattern = minimo)] <- "Minimo"
   #colores[str_detect(datos_x, pattern = maximo)] <- "Maximo"
   colores
@@ -148,7 +161,7 @@ graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Ta
   }
 
   # tipo de grafico
-  p <- p + geom_bar(stat = 'identity', show.legend = FALSE) +
+  p <- p + geom_bar(stat = 'identity', show.legend = FALSE, width = 0.8) +
     # limites
     #ylim(datos_y[which(datos_x == minimo)], datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo])) +
 
@@ -160,8 +173,8 @@ graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Ta
     #scale_y_continuous(expand = c(0,0)) +
     # ylim(0, datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo])) +
     # Colores
-    scale_fill_manual(values = c('dimgray',
-                                 'dodgerblue1',
+    scale_fill_manual(values = c(color_base,
+                                 color_estados_interes,
                                  #'red',
                                  #'turquoise',
                                  'gray')) +
@@ -207,9 +220,15 @@ graficas_base <- function(titulo = "", datos_x, datos_y, estados_interes = c("Ta
 
 }
 
-x <- letters
-y <- rnorm(n = 26)
 
-args(graficas_base)
-graficas_base(datos_x = x, datos_y = y, estados_interes = NULL, mejorArriba = F)
+# x <- letters
+# y <- rnorm(n = 26) * 1000000
+# cbind.data.frame(x,y)
+#
+# y[10] <- 0
+#
+# args(graficas_base)
+# graficas_base(datos_x = x, datos_y = y, estados_interes = c("j", "m", "o", "v", "t", "w"), mejorArriba = F, highlightMinMax = FALSE, etiqueta_numero = "%")
+#
+
 
