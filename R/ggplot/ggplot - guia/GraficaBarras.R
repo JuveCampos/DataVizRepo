@@ -4,14 +4,17 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
                           etiqueta_nacional = "Nacional",
                           color_estados_interes = "dodgerblue1",
                           color_base = "dimgray",
+                          color_nacional = "gray",
                           mejorArriba = TRUE,
                           nombre_archivo = "grafica_",
                           highlightMinMax = TRUE,
-                          etiqueta_numero = ""
+                          etiqueta_numero = "",
+                          subtitulo = NULL,
+                          pie_de_pagina = NULL
                           ){
 
 
-  pacman::p_load(tidyverse, rebus)
+  pacman::p_load(tidyverse, rebus, leaflet)
   extrafont::fonts()
 
   # Librerias
@@ -56,9 +59,9 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
   # LAS PRUEBAS
   ###########################################################
   # titulo <-  whiches$Indicador[1]
-  # datos_x <- base_fil$ent
-  # datos_y <- base_fil$valor
-  # estados_interes <- c("Tamaulipas", 'Nacional')
+  # datos_x <- x
+  # datos_y <- y
+  # # estados_interes <- c("Tamaulipas", 'Nacional')
   # mejorArriba = TRUE
   # nombre_archivo <- "aaaaa"
   ###########################################################
@@ -122,8 +125,10 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
 
   # Etiquetas
   etiquetas <- c(rep("", length(datos_x)))
-  etiquetas[str_detect(datos_x, or1(exactly(estados_interes)))] <-
-    datos$datos_y[which(str_detect(datos_x, or1(exactly(estados_interes))))]
+  etiquetas[str_detect(datos_x, or1(exactly(estados_interes)))] <- datos$datos_y[which(str_detect(datos_x, or1(exactly(estados_interes))))]
+
+  etiquetas[str_detect(datos_x, or1(exactly(etiqueta_nacional)))] <- datos$datos_y[which(str_detect(datos_x, or1(exactly(etiqueta_nacional))))]
+
   etiquetas
   # as.numeric(etiquetas)
   etiquetas_pos  <- case_when(is.na(as.numeric(etiquetas)) ~ "",
@@ -143,6 +148,11 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
   #colores[str_detect(datos_x, pattern = minimo)] <- "Minimo"
   #colores[str_detect(datos_x, pattern = maximo)] <- "Maximo"
   colores
+
+  pal <- leaflet::colorFactor(palette = c(color_base,
+                                   color_estados_interes,
+                                   color_nacional),
+                              domain = c("base", "Estado_interes", "Nacional"))
 
   # Limites de los ejes #
   lim_inicial <- 0
@@ -165,7 +175,6 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
     # limites
     #ylim(datos_y[which(datos_x == minimo)], datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo])) +
 
-
     ### ylim(lim_inicial, datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo]))  +
     #ylim(lim_inicial, datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo]), expand = c(0, 0)) +
     scale_y_continuous(limits = c(lim_inicial, datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo])), expand = c(0, 0)) +
@@ -173,14 +182,13 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
     #scale_y_continuous(expand = c(0,0)) +
     # ylim(0, datos_y[which(datos_x == maximo)] + 0.3*(datos_y[datos_x == maximo])) +
     # Colores
+
     scale_fill_manual(values = c(color_base,
                                  color_estados_interes,
-                                 #'red',
-                                 #'turquoise',
-                                 'gray')) +
+                                 color_nacional)) +
     tema_propio + theme(axis.text.x=element_blank(),
-                        axis.text.y = element_text(face = "bold", size = 12),
-                        legend.text = element_text(face = "bold", size = 15),
+                        axis.text.y = element_text(face = "bold",  size = 12),
+                        legend.text = element_text(face = "bold",  size = 15),
                         axis.title.x = element_text(face = "bold", size = 15),
                         axis.title.y = element_text(face = "bold", size = 15),
                         plot.caption = element_text(size = 10),
@@ -188,21 +196,24 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
                         legend.position="top") +
     # labels
     ggtitle(cortaTitulos(titulo)) +
+    labs(subtitle = subtitulo,
+         caption = pie_de_pagina) +
     xlab("") +
     ylab("") +
     # opciones adicionales
     coord_flip() +  # Voltea los ejes :3
-    geom_text(aes(label = etiquetas_pos),
-              colour = 'black',
+    geom_text(aes(label = etiquetas_pos, fontface = "bold"),
+              colour = pal(colores),
               #fontface = "bold",
               size = 6,
               hjust = -0.2
     ) +
-    geom_text(aes(label = etiquetas_neg),
-              colour = 'black',
+    geom_text(aes(label = etiquetas_neg, fontface = "bold"),
+              colour = pal(colores),
               #fontface = "bold",
               size = 6,
-              hjust = 1.2)
+              hjust = 1.2
+              )
 
   # Cambiamos fuentes y tipos de letra
   #p <- p + theme(text=element_text(size=16,  family="Comic sans"))
@@ -220,7 +231,7 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
 
 }
 
-
+#
 # x <- letters
 # y <- rnorm(n = 26) * 1000000
 # cbind.data.frame(x,y)
@@ -228,7 +239,11 @@ graficas_base <- function(titulo = "", datos_x, datos_y,
 # y[10] <- 0
 #
 # args(graficas_base)
-# graficas_base(datos_x = x, datos_y = y, estados_interes = c("j", "m", "o", "v", "t", "w"), mejorArriba = F, highlightMinMax = FALSE, etiqueta_numero = "%")
+# graficas_base(datos_x = x, datos_y = y, estados_interes = c("j", "m", "o", "v", "t", "w"),
+#               etiqueta_nacional = "q",
+#               color_nacional = "green",
+#               color_base = "red",
+#               mejorArriba = F,
+#               highlightMinMax = TRUE,
+#               etiqueta_numero = "%")
 #
-
-
